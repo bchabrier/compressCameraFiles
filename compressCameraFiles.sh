@@ -4,7 +4,7 @@ zip="C:/Program Files/7-Zip/7z.exe"
 target="$1"
 
 pause () {
-	/bin/echo -n "Appuyer sur une touche pour continuer... "
+	echo -n "Appuyer sur une touche pour continuer... "
         read v
 }
 
@@ -25,15 +25,15 @@ then
 fi
 
 status () {
-	/bin/echo " $1/$2 files moved (`/bin/expr $1 '*' 100 / $2`%)"
+	echo " $1/$2 files moved (`expr $1 '*' 100 / $2`%)"
 }
 
 list_files () {
-  /bin/echo "$1"/*.jpg | /bin/grep -v '*'
+  echo "$1"/*.jpg | grep -v '*'
 }
 
 nbfiles () {
-  /bin/echo `files "$1"` | wc -w
+  echo `files "$1"` | wc -w
 }
 
 cd "$target"
@@ -50,24 +50,24 @@ for c in *
 #/bin/echo $files
 
   max=10
-  n=`/bin/echo $files | wc -w`
+  n=`echo $files | wc -w`
   if [ $n -eq 0 ]
   then
-    /bin/echo "No file to move."
+    echo "No file to move."
   fi
   while [ $n -gt 0 ]
     do
-    /bin/echo "Found $n file(s) to move."
+    echo "Found $n file(s) to move."
     i=1
     for f in $files
       do
-      /bin/echo -n '.'
-      if [ `/bin/expr $i % $max` = 0 ]
+      echo -n '.'
+      if [ `expr $i % $max` = 0 ]
       then  
 	status $i $n
       fi
-      i=`/bin/expr $i + 1`
-      rep=`/bin/awk 'BEGIN { 
+      i=`expr $i + 1`
+      rep=`awk 'BEGIN { 
         split("'"$f"'",t,"_"); 
 	d=t[3];
 	year=substr(d,1,4);
@@ -76,15 +76,15 @@ for c in *
 	hour=substr(d,9,2);
 	printf("%s/%s-%s-%s/%sh", "'"$c"'", year, month, day, hour);
 	}' < /dev/null`
-      /bin/mkdir -p $rep
-      /bin/mv $f $rep
+      mkdir -p $rep
+      mv $f $rep
       done
-      if [ `/bin/expr $i % $max` != 1 ]
+      if [ `expr $i % $max` != 1 ]
       then
         status $n $n
       fi
     files=`list_files "$c"`
-    n=`/bin/echo $files | wc -w`
+    n=`echo $files | wc -w`
     done
   done
 
