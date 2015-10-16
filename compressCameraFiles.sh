@@ -1,17 +1,25 @@
 #!/bin/sh 
 
 zip="C:/Program Files/7-Zip/7z.exe"
+target="$1"
 
 pause () {
 	/bin/echo -n "Appuyer sur une touche pour continuer... "
         read v
 }
 
-
-net use z: https://dav.box.com/dav /savecred /persistent:yes > /dev/null 2>&1
-if [ ! -d Z:/Perso/Cameras ]
+if [ "`uname -a | grep Linux`" != "" ]
 then
-   echo "Cannot find Z:/Perso/Cameras"
+    mount ~pi/Box 2>/dev/null
+    target="/home/pi/Box/Perso/Cameras"
+else
+    net use z: https://dav.box.com/dav /savecred /persistent:yes > /dev/null 2>&1
+    target="Z:/Perso/Cameras"
+fi
+
+if [ ! -d "$target" ]
+then
+   echo "Cannot find '$target'"
    pause
    exit
 fi
@@ -25,10 +33,10 @@ list_files () {
 }
 
 nbfiles () {
-  /bin/echo `files "$1"` | /bin/wc -w
+  /bin/echo `files "$1"` | wc -w
 }
 
-cd Z:/Perso/Cameras
+cd "$target"
 for c in *
   do
   echo "Found camera: '$c'."
@@ -42,7 +50,7 @@ for c in *
 #/bin/echo $files
 
   max=10
-  n=`/bin/echo $files | /bin/wc -w`
+  n=`/bin/echo $files | wc -w`
   if [ $n -eq 0 ]
   then
     /bin/echo "No file to move."
@@ -76,7 +84,7 @@ for c in *
         status $n $n
       fi
     files=`list_files "$c"`
-    n=`/bin/echo $files | /bin/wc -w`
+    n=`/bin/echo $files | wc -w`
     done
   done
 
