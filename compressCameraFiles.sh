@@ -3,6 +3,8 @@
 zip="C:/Program Files/7-Zip/7z.exe"
 target="$1"
 
+echo "Starting at `date`"
+
 pause () {
 	echo -n "Appuyer sur une touche pour continuer... "
         read v
