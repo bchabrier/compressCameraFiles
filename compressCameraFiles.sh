@@ -8,6 +8,52 @@ pause () {
         read v
 }
 
+LOCKFILE=/tmp/compressCameraFiles.lock
+
+get_locker ()
+{
+    head -1 $LOCKFILE
+}
+
+take_lock ()
+{
+    echo $$ >> $LOCKFILE
+    _locker=`get_locker`
+    if ! [ "$_locker" = $$ ]
+    then
+	# try to see if the locker still exists
+	_proc=`ps agux | awk '{ print $2}' | grep "$_locker"`
+	if [ "$_proc" = "" ]
+	then
+	    # locker has died? Let's take the lock
+	    echo "Locker seems dead. Trying to take it..."
+	    rm -f $LOCKFILE
+	    take_lock
+	    return $?
+	fi
+	return 1
+    fi
+    return 0
+}
+
+release_lock ()
+{
+    _locker=`get_locker`
+    if [ "$_locker" = $$ ]
+    then
+	rm -f $LOCKFILE
+    else
+	echo "Cannot unlock '$lockfile'. Am not the locker!" >&2
+    fi
+}
+
+if ! take_lock
+then
+    # cannot take the lock, exit
+    echo "Cannot take lock. Exiting..." >&2
+    exit 1
+fi
+
 if [ "`uname -a | grep Linux`" != "" ]
 then
     mount ~pi/Box 2>/dev/null
@@ -89,6 +135,9 @@ for c in *
   done
 
 
+release_lock
+
+exit 0
 
 
 
